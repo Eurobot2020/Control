@@ -1,0 +1,15 @@
+.\obj\main.o: ..\USER\main.c
+.\obj\main.o: ..\Libraries\CM3\DeviceSupport\LPC17xx.h
+.\obj\main.o: ..\Libraries\CM3\CoreSupport\core_cm3.h
+.\obj\main.o: C:\Keil\ARM\ARMCC\bin\..\include\stdint.h
+.\obj\main.o: ..\Libraries\CM3\CoreSupport\core_cmInstr.h
+.\obj\main.o: ..\Libraries\CM3\CoreSupport\core_cmFunc.h
+.\obj\main.o: ..\Libraries\CM3\DeviceSupport\system_LPC17xx.h
+.\obj\main.o: ..\Libraries\setup.h
+.\obj\main.o: ..\USER\state.h
+.\obj\main.o: ..\Libraries\GLCD\GLCD.h
+.\obj\main.o: ..\Libraries\TouchPanel\TouchPanel.h
+.\obj\main.o: ..\Libraries\LPC1700CMSIS_Firmware_Library\include\lpc17xx_ssp.h
+.\obj\main.o: ..\Libraries\LPC1700CMSIS_Firmware_Library\include\lpc_types.h
+.\obj\main.o: ..\Libraries\LPC1700CMSIS_Firmware_Library\include\lpc17xx_gpio.h
+.\obj\main.o: ..\Libraries\LPC1700CMSIS_Firmware_Library\include\lpc17xx_pinsel.h

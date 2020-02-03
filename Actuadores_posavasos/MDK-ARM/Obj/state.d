@@ -1,0 +1,11 @@
+.\obj\state.o: ..\USER\state.c
+.\obj\state.o: ..\Libraries\CM3\DeviceSupport\LPC17xx.h
+.\obj\state.o: ..\Libraries\CM3\CoreSupport\core_cm3.h
+.\obj\state.o: C:\Keil\ARM\ARMCC\bin\..\include\stdint.h
+.\obj\state.o: ..\Libraries\CM3\CoreSupport\core_cmInstr.h
+.\obj\state.o: ..\Libraries\CM3\CoreSupport\core_cmFunc.h
+.\obj\state.o: ..\Libraries\CM3\DeviceSupport\system_LPC17xx.h
+.\obj\state.o: ..\Libraries\constants.h
+.\obj\state.o: ..\USER\pantalla.h
+.\obj\state.o: ..\Libraries\GLCD\GLCD.h
+.\obj\state.o: ..\Libraries\i2c_lpc17xx.h
