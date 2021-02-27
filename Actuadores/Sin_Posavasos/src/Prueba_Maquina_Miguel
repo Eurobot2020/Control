@@ -1,0 +1,186 @@
+#include "Variables.h"
+#include "Control_brazo.h"
+#include "Mensaje.h"
+// Estados
+#define ST_INICIAL 0
+#define ST_PARADO 1
+#define VERTICAL 2
+#define HORIZONTAL 3
+//Neumática
+#define VACIO 1
+#define REPOSO 0
+//Prioridades comunicación
+#define NORMAL 0
+#define URGENTE 1
+
+//Variables maquina de estado
+int Flag_EstadoFinalizado=1;
+int Estado = ST_INICIAL;
+int Siguiente_Estado = ST_PARADO;
+
+//Caracterización de mensaje
+char Instruccion_Codigo = ST_INICIAL;          //Aqui se guardan  los comandos
+char Instruccion_Prioridad = NORMAL;          //Aqui almacenamos la prioridad
+
+void lectura_PWM(){
+if(valor>1000 && Inicio==0 ){
+  contador_pulsos ++;
+  Inicio =1;
+}
+
+if(valor<800){
+  Inicio =0;
+}
+}
+void reset_pose(){
+//Ponemos a cero el valor en X e Y de la posición del brazo
+  X =0;
+  Y = 0;
+}
+void configuracion_brazo(){
+//Realización de las configuraciones del brazo robot
+paso_tornillo = 8; //Paso del tornillo de 8mm/rev
+pulsos_por_rev = 200; //Número de pasos del motor NEMA por rev (pasos/rev)
+frecuencia = 700;  //Frecuencia de la PWM para los motores
+combinacion =0;  //Todas las ventosas desactividas
+
+//Inicialización de los pines de salida del brazo robot
+//Ventosas desactivadas
+digitalWrite(Neumatica_1,LOW);
+digitalWrite(Neumatica_2,LOW);
+digitalWrite(Neumatica_3,LOW);
+digitalWrite(Neumatica_4,LOW);
+digitalWrite(Neumatica_5,LOW);
+//Bits de dirección a cero
+digitalWrite(Bit_dir_V,LOW);
+digitalWrite(Bit_dir_H,LOW);
+//Motores deshabilitados para que no funciones(Escribir un nivel alto)
+digitalWrite(Enable_V,HIGH);
+digitalWrite(Enable_H,HIGH);
+}
+/********************************COMANDOS******************************/
+//COMANDO INICIAL: este se ejecutará una única vez
+void CMD_Inicial(void){
+  reset_pose();
+  configuracion_brazo();
+}
+//COMANDO PARADO: se asegurará que los motores estés parados
+void CMD_Parado(void){
+  //Me aseguro de tener los motor parados
+  digitalWrite(Enable_V,HIGH);
+  digitalWrite(Enable_H,HIGH);
+  if(Instruccion_Codigo != ST_PARADO){
+    Flag_EstadoFinalizado =1; //Pone el flag de finalizado activo para que cambie de estado
+  }
+}
+//COMANDO VERTICAL: hace que el brazo se desplace verticalmente hacia arriba y abajo
+void CMD_Vertical(void){
+  lectura_PWM();
+  digitalWrite(Enable_V,HIGH);
+  digitalWrite(Enable_H,LOW);
+  calculos_control();
+
+  Inicio=0;
+  Flag_EstadoFinalizado =0;
+  contador_pulsos =0;
+  
+}
+//COMANDO HORIZONTA: hace que el brazo se desplace horizontalmente hacia derecha e izquierda
+void CMD_Horizontal(void){
+
+  if(Inicio){
+    
+  digitalWrite(Enable_V,LOW);
+  digitalWrite(Enable_H,HIGH);
+  calculos_control();
+
+  
+    Inicio=0;
+  Flag_EstadoFinalizado =0;
+  contador_pulsos =0;
+  }
+  if(lazo_control_brazo){
+    
+  }
+}
+void Maquina_Estados(void){
+  switch (Instruccion_Codigo){
+    case ST_INICIAL:
+    Siguiente_Estado = ST_INICIAL;
+    break;
+    case 'V':
+    Siguiente_Estado = VERTICAL;
+    break;
+    case 'H':
+    Siguiente_Estado = HORIZONTAL;
+    break;
+    default:
+    Siguiente_Estado = ST_PARADO;
+    break;
+  }
+  if(Instruccion_Prioridad || Flag_EstadoFinalizado)
+ {
+  Estado = Siguiente_Estado;
+  //Limpia mensaje para que en caso de no recibir nada vaya a ST_PARADO
+  Instruccion_Codigo = ST_PARADO;
+  Instruccion_Prioridad = NORMAL;
+ }
+}
+void comprobacion(){
+  if(Enviar==1){
+  Serial.print("Posición en Y:");
+Serial.println(Y);
+Serial.print("Posición en X:");
+Serial.println(X);
+Serial.print("Ventosa 1:");
+Serial.println(Estado_V1);
+Serial.print("Ventosa 2:");
+Serial.println(Estado_V2);
+Serial.print("Ventosa 3:");
+Serial.println(Estado_V3);
+Serial.print("Ventosa 4:");
+Serial.println(Estado_V4);
+Serial.print("Ventosa 5:");
+Serial.println(Estado_V5);
+Serial.print("Estado:");
+Serial.println(Estado);
+Enviar =0;
+
+}
+}
+void setup() {
+tone(7,700); //Creamos la señal PWM 
+Serial.begin(9600);
+  pinMode(Neumatica_1, OUTPUT);
+  pinMode(Neumatica_2, OUTPUT);
+  pinMode(Neumatica_3, OUTPUT);
+  pinMode(Neumatica_4, OUTPUT);
+  pinMode(Neumatica_5, OUTPUT);
+}
+
+void loop() {
+ //Analizamos las transiciones que haya en la máquina de estados
+ Leer_mensaje();
+ Maquina_Estados();
+ //Bucle de cambio de estado
+ switch(Estado){
+  case ST_INICIAL:
+  CMD_Inicial();
+  break;
+  case ST_PARADO:
+  CMD_Parado();
+  break;
+  case VERTICAL:
+  CMD_Vertical();
+  break;
+  case HORIZONTAL:
+  CMD_Horizontal();
+  break;
+  default:
+  CMD_Parado();
+  Instruccion_Codigo = ST_PARADO;
+  break;
+ }
+ comprobacion();
+
+}
