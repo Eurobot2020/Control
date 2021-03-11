@@ -23,7 +23,7 @@ void PWM2_SetDuty (float ciclo)
 	float duty;																										//Se define la variable duty, que sirve para calcular de forma
 																																//sencilla el valor del MR2
 	//Serial.println(ciclo);
-	duty=(float)fabs((double)ciclo) * 0.8	+	0.1;					//El duty se calcula como el 10% de m�nimo mas el valor absoluto de
+	duty=(float)fabs((double)ciclo) * 0.8	+	0.099;					//El duty se calcula como el 10% de m�nimo mas el valor absoluto de
 																																//la velocidad entre mil. La funci�n fabs recibe y devuelve un double
 																																//y es por eso por lo que necesitamos las conversiones de tipo.
 	OCR0B = duty*255;
@@ -37,7 +37,7 @@ void PWM3_SetDuty (float ciclo)
 	float duty;																										//Se define la variable duty, que sirve para calcular de forma
 																																//sencilla el valor del MR3
 	// Serial.println(ciclo);
-	duty=(float)fabs((double)ciclo)	* 0.8	+	0.1;			//El duty se calcula como el 10% de m�nimo mas el valor absoluto de
+	duty=(float)fabs((double)ciclo)	* 0.8	+	0.099;			//El duty se calcula como el 10% de m�nimo mas el valor absoluto de
 																																//la velocidad entre mil. La funci�n fabs recibe y devuelve un double
 																																//y es por eso por lo que necesitamos las conversiones de tipo.
 	OCR0A = duty*255;

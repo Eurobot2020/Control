@@ -16,6 +16,8 @@
 #define I_DIR 8
 #define I_STOP 9
 
+extern bool sentido_dcha;
+extern bool sentido_izq;
 //NOTA IMPORTANTE: he definido el struct en un fichero '.h' aparte para que pueda acceder a los campos de esta estructura desde cualquier 
 //fichero '.c' que haya creado. Adem�s para asegurarme que se cambian los valores de los campos del struct he usado punteros donde envio la
 //direccion de memoria del struct
@@ -28,19 +30,23 @@ void sentido_motores (int m_izquierdo, int m_derecho)
 	if(m_izquierdo)
 	{
 		digitalWrite(I_DIR,HIGH);			//AVANZA EL IZQUIERDO
+		sentido_izq = 1;
 	}
 	else 
 	{
 		digitalWrite(I_DIR,LOW);			//RETROCEDE EL IZQUIERDO
+		sentido_izq = 0;
 	}
 
 	if(m_derecho)
 	{
 		digitalWrite(D_DIR,LOW);			//AVANZA EL DERECHO
+		sentido_dcha = 1;
 	}
 	else
 	{
 		digitalWrite(D_DIR,HIGH);			//RETROCEDE EL DERECHO
+		sentido_dcha = 0;
 	}
 	
 }
@@ -68,14 +74,16 @@ void velocidad_izquierda (double rad_por_s,param_mecanicos *mecanica)	//Esta fun
 
 void apaga_motores (void)
 {
-	digitalWrite(I_EN,LOW);
-	digitalWrite(D_EN,LOW);
+	PORTD &= ~(B10010000);
+	// digitalWrite(I_EN,LOW);
+	// digitalWrite(D_EN,LOW);
 }
 
 void enciende_motores (void)
 {
-	digitalWrite(I_EN,HIGH);
-	digitalWrite(D_EN,HIGH);
+	PORTD |= B10010000;
+	// digitalWrite(I_EN,HIGH);
+	// digitalWrite(D_EN,HIGH);
 }
 
 void motores (cinematica *variable, param_mecanicos *mecanica)

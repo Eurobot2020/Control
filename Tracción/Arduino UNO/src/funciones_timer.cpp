@@ -11,7 +11,9 @@ extern Caracterizacion Robot;
 extern T_Counter cuadratura;
 
 extern long contador;
-
+extern bool sentido_dcha;
+extern bool sentido_izq;
+extern bool parado;
 void act_odom(Caracterizacion *situacion, T_Counter *contadores, param_mecanicos *mecanica) 
 {
 	double deltaO, avance, deltaX, deltaY;		//definici�n de avance en recto del robot, incremento del �ngulo, incremento en X e incremento en Y 
@@ -44,6 +46,22 @@ void act_odom(Caracterizacion *situacion, T_Counter *contadores, param_mecanicos
 
 }
 
+void check_mov(T_Counter *contadores){
+	static long contador_reg_dcha = 0;
+	static long contador_reg_izq = 0;
+	if (contador_reg_dcha == contadores->contador_derecho_total || contador_reg_izq == contadores->contador_izquierdo_total)
+	{
+		parado = true;
+
+	}
+	else
+	{
+		parado = false;
+	}
+	contador_reg_dcha = contadores->contador_derecho_total;
+	contador_reg_izq = contadores->contador_izquierdo_total;
+}
+
 ISR(TIMER1_COMPA_vect)    //This is the interrupt request
 {	
 	calcula_error_rueda_izquierda (&lazo_abierto, &maxon);
@@ -54,6 +72,7 @@ ISR(TIMER1_COMPA_vect)    //This is the interrupt request
 	
 	act_odom(&Robot,&cuadratura,&maxon);
 	
+	check_mov(&cuadratura);
 	contador++;
 
 	if (contador%50==0){
@@ -63,6 +82,10 @@ ISR(TIMER1_COMPA_vect)    //This is the interrupt request
 		Serial.print(int(Robot.Pos.Y));
 		Serial.print("A");
 		Serial.println(int(Robot.Orientacion));
+		// if (parado)
+		// {
+		// 	Serial.println("PARADO");
+		// }
 	}
 	
 
@@ -79,7 +102,8 @@ void int_derecha (void){			//C�digo de la interrupci�n del encoder de la rue
 	//cuadratura.contador_derecho++;
 	// Serial.println("Encoder derecho");
 		
-		if ((PINB&B00000100)>>2==1) 				//Valor del pin 10
+
+		if (!sentido_dcha) 				//Valor del pin 10
 		{
 			cuadratura.contador_derecho--;		//Si al cambiar a alto el canal A el canal B esta en alto vamos hacia alante
 			// Serial.println("Encoder derecho");
@@ -90,6 +114,18 @@ void int_derecha (void){			//C�digo de la interrupci�n del encoder de la rue
 			cuadratura.contador_derecho++;											//Si al cambiar a alto el canal A el canal B esta en bajo vamos hacia atras
 			//Serial.println("+");
 		}
+
+		/* if ((PINB&B00000100)>>2==1) 				//Valor del pin 10
+		{
+			cuadratura.contador_derecho--;		//Si al cambiar a alto el canal A el canal B esta en alto vamos hacia alante
+			// Serial.println("Encoder derecho");
+			//Serial.println("-");
+		}
+		else
+		{
+			cuadratura.contador_derecho++;											//Si al cambiar a alto el canal A el canal B esta en bajo vamos hacia atras
+			//Serial.println("+");
+		} */
 		
 }
 
@@ -98,7 +134,7 @@ void int_izquierda (void){			//C�digo de la interrupci�n del encoder de la r
 	//cuadratura.contador_izquierdo++;
 	// Serial.println("Encoder izquierda");
 	
- 	if ((PINB&B00100000)>>5==1)					//Valor del pin 13
+	if (sentido_izq)					//Valor del pin 13
 	{
 		cuadratura.contador_izquierdo++;											//Si al cambiar a alto el canal A el canal B esta en alto vamos hacia alante
 		// Serial.println("Encoder izquierda");
@@ -106,6 +142,16 @@ void int_izquierda (void){			//C�digo de la interrupci�n del encoder de la r
 	else
 	{
 		cuadratura.contador_izquierdo--;											//Si al cambiar a alto el canal A el canal B esta en bajo vamos hacia atras
-	} 
+	}
+
+ 	/* if ((PINB&B00100000)>>5==1)					//Valor del pin 13
+	{
+		cuadratura.contador_izquierdo++;											//Si al cambiar a alto el canal A el canal B esta en alto vamos hacia alante
+		// Serial.println("Encoder izquierda");
+	}
+	else
+	{
+		cuadratura.contador_izquierdo--;											//Si al cambiar a alto el canal A el canal B esta en bajo vamos hacia atras
+	} */ 
 	
 }

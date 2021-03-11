@@ -14,7 +14,7 @@
 
 
 #define FPCLK 25e6
-#define error_final 			0.1
+#define error_final 			0.05
 
 /**** Variables de la comunicación por UART (by Lesmus Trompiz) ****/
 
@@ -47,7 +47,9 @@ cinematica lazo_abierto;							//Estructura de variables cinemáticas
 param_mecanicos maxon;								//Estructura de parámetros mecánicos
 
 bool vel_fin_cambiar;
-
+bool sentido_dcha;
+bool sentido_izq;
+bool parado;
 /**** Estados de la máquina de estados ****/
 
 #define 	ST_INICIAL			0
@@ -74,6 +76,7 @@ char Instruccion_Prioridad = NORMAL;					//Aqui almacenamos la prioridad
 
 /****  Variables maquina estados  ****/
 
+int flag_safety_freno = 1;
 int Flag_EstadoFinalizado = 1;                           //La inicializo a 1 para que actualice Estado desde ST_INICIAL
 int Siguiente_Estado = ST_INICIAL; 	
 int Estado = ST_INICIAL;
@@ -87,6 +90,8 @@ long contador = 0;
 void reset_odometria(void){
   cuadratura.contador_derecho_total=0;
   cuadratura.contador_izquierdo_total=0;
+  cuadratura.contador_derecho_total_sumado = 0;
+  cuadratura.contador_izquierdo_total_sumado = 0;
 }
 
 void reset_pose(void) {
@@ -116,6 +121,7 @@ int CMD_Inicial(void){
 
     // Inicio=0;
     //Flag_EstadoFinalizado=0			//En ST_INICIAL no hace falta ya que está deseoso de órdenes
+    parado = true;
     reset_odometria();
     reset_pose();
     Robot.VelActual = 0.0;
@@ -134,14 +140,15 @@ int CMD_Parado(void){
 //Función de seguridad en el que llevamos todas las velocidades a 0 y miramos por la siguiente instrucción
 //Seguramente estamos aquí por un mensaje de FRENO
 
-static char flag_timer = 1;
-
+static bool flag_timer = 1;
+static bool envio = 1;
   if(Inicio){
 
     contador = 0;
     Inicio=0;
     Flag_EstadoFinalizado=0;				//En ST_PARADO SÍ hay que hacerlo inicialmente ya que solemos llegar por ENEMIGO
     Serial.println("EP");
+    flag_safety_freno = 0;
   }
 
 
@@ -149,8 +156,14 @@ static char flag_timer = 1;
 
     flag_timer = 0;
     apaga_motores();
-
+   
+  }
+  
+  if (parado && envio)
+  { 
+    envio = 0;
     transmitir_estado();
+    Serial.println("DRACUPARADO");
     Serial.println(cuadratura.contador_derecho_total);
     Serial.println(cuadratura.contador_izquierdo_total);
     Serial.println(cuadratura.contador_derecho_total_sumado);
@@ -158,15 +171,16 @@ static char flag_timer = 1;
     Robot.VelActual = 0.0;
     reset_pose();
     reset_odometria();
-    
   }
   
-  if(Instruccion_Codigo != ST_PARADO){
+  if(Instruccion_Codigo != ST_PARADO && !envio ){ // || Instruccion_Codigo != 'F'   && Instruccion_Codigo != 'F'
 
     Flag_EstadoFinalizado = 1;
     Inicio = 1;
     flag_timer = 1;
     Serial.println("SP"); 
+    flag_safety_freno = 1;
+    envio = 1;
   }
   return 0;
 }
@@ -175,8 +189,8 @@ int CMD_Recta(void){
 //Avanzamos una distancia en línea recta a velocidad máxima definida
 
 
-static char Flag_Frenada = 1;
-static char flag_timer = 1; 
+static bool Flag_Frenada = 1;
+static bool flag_timer = 1; 
   if(Inicio){
 
     Inicio = 0;
@@ -230,8 +244,8 @@ static char flag_timer = 1;
 int CMD_Giro(void){
 //Giramos sobre el eje del robot un ángulo definido a velocidad máxima definida
 
-static char Flag_Frenada = 1;
-static char flag_timer = 1;
+static bool Flag_Frenada = 1;
+static bool flag_timer = 1;
 
   if(Inicio){
 
@@ -314,9 +328,9 @@ int CMD_Freno(void){
       Inicio = 1;
       Instruccion_Codigo = ST_PARADO;			//Al no estar entre las opciones, se irá al default que es ST_PARADO
       
-      transmitir_estado();				//En este estado incluye la que se movió con el estado anterior, ya que no hubo flag_final al ser URGENTE
-      reset_pose();
-      reset_odometria();
+      // transmitir_estado();				//En este estado incluye la que se movió con el estado anterior, ya que no hubo flag_final al ser URGENTE
+      // reset_pose();
+      // reset_odometria();
       
     }
   
@@ -351,7 +365,7 @@ int Maquina_Estados(void){
     }
     
     // Si el estado ha finalizado o hay un mensaje de prioridad urgente -> cambio de estado
-    if(Instruccion_Prioridad || Flag_EstadoFinalizado){
+    if(Instruccion_Prioridad || Flag_EstadoFinalizado ){ //|| flag_safety_freno
       Estado = Siguiente_Estado;
       // Serial.println(Estado);
       //Limpia el mensaje para que en caso de no recibir nada se pare

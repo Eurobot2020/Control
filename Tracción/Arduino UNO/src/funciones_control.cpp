@@ -102,43 +102,44 @@ void Ajustar_distancia_recta (cinematica *variable,param_mecanicos *mecanica){
 	double vel_real = (double) (variable->velocidad_final * mecanica->diametro * 10 / 2);
 
 		
-		caso = 1 + (fabs(vel_real) > 50) + (fabs(vel_real) > 100) + (fabs(vel_real) > 250) +
+		caso = 1 + (fabs(vel_real) > 100) + (fabs(vel_real) > 175) + (fabs(vel_real) > 250) +
 		(fabs(vel_real) > 350) + (fabs(vel_real) > 550) + (fabs(vel_real) >= 600);
 	
 		switch (caso)
 		{
 			case 1:
-				variable->ajustar_distancia = 0.001;
+				variable->ajustar_distancia = 0.1;
 			break;
 		
 			case 2:
-				variable->ajustar_distancia = 0.001;
+				variable->ajustar_distancia = 0.1;//done
 			break;
 		
 			case 3:
-				variable->ajustar_distancia = 0.001;
+				variable->ajustar_distancia = 0.2;
 			break;
 		
 			case 4:
-				variable->ajustar_distancia = 0.001;
+				variable->ajustar_distancia = 0.2;
 			break;
 		
 			case 5:
-				variable->ajustar_distancia = 0.001;
+				variable->ajustar_distancia = 0.2;
 			break;
 		
 			case 6:
-				variable->ajustar_distancia = 0.001;
+				variable->ajustar_distancia = 0.2;
 			break;
 		
 			case 7:
-				variable->ajustar_distancia = 0.001;
+				variable->ajustar_distancia = 0.2;
 			break;
 			
 		}
-		// Serial.println(vel_real);
-		// Serial.println("Ajustando distancia");
+		Serial.println(vel_real);
+		Serial.println("Ajustando distancia");
 		// Serial.println(variable->ajustar_distancia,4);
+		Serial.println(caso);
 	}
 	
 //Funcion que calcula los parametros de la cinematica, dicha funcion se llamara cuando tenga que avanzar o hacer un giro--
@@ -178,8 +179,8 @@ void calcula_parametros_recta (cinematica *variable, param_mecanicos *mecanica)
 				variable->distancia_acel_vel_cte = 0.5 * variable->distancia_total_rad;
 			}
 	Ajustar_distancia_recta(variable,mecanica);
-	Serial.println(variable->distancia_total_rad);
-	Serial.println(variable->distancia_acel_vel_cte);
+	// Serial.println(variable->distancia_total_rad);
+	// Serial.println(variable->distancia_acel_vel_cte);
 }
 
 
@@ -187,7 +188,7 @@ void calcula_parametros_giro (cinematica *variable, param_mecanicos *mecanica)
 {		
 	variable->distancia_total_rad = ( PI * fabs(grados_giro)) * mecanica->L / (360 * ( mecanica->diametro /2 ) );
 	variable->velocidad_final = 	2.5;														//	5;
-	Serial.println(variable->distancia_total_rad);
+	// Serial.println(variable->distancia_total_rad);
 
 	calculo_de_frenada(variable,mecanica);
 	variable->distancia_acel_vel_cte = variable->distancia_total_rad - variable->distancia_frenada; 

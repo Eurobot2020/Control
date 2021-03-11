@@ -144,5 +144,6 @@ void Traduccion_Variables(cinematica *variable)
         Instruccion_Codigo = 1;
     }
   // clear the string:
-  inputString = "";
+  inputString = "";  // Importante inicializar las Strings (OJO A LA MAYÚSCULA) o luego nos reímos
 }
+
