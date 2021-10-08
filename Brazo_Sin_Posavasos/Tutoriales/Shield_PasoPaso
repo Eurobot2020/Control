@@ -1,0 +1,67 @@
+#include <Arduino.h>
+#define EN        8       // stepper motor enable, low level effective
+#define X_DIR     2       //X axis, stepper motor direction control 
+#define Y_DIR     3       //y axis, stepper motor direction control
+#define Z_DIR     4       //z axis, stepper motor direction control
+#define X_STP     5       //x axis, stepper motor control
+#define Y_STP     6       //y axis, stepper motor control
+#define Z_STP     7       //z axis, stepper motor control
+#define DELAY     1000     //ms
+/*
+// Function: step   -control the direction and number of steps of the stepper motor
+// Parameter: dir  -direction control, dirPin corresponds to DIR pin, stepperPin correspomds to 
+
+
+step pin, steps is the number of steps.
+// no return value
+*/
+
+void step(boolean dir, byte dirPin, byte stepperPin, int steps)
+{
+  digitalWrite(dirPin, dir);
+  delay(50);
+  for (int i = 0; i < steps; i++) {
+    digitalWrite(stepperPin, HIGH);
+    delayMicroseconds(DELAY);  
+    digitalWrite(stepperPin, LOW);
+    delayMicroseconds(DELAY);  
+  }
+}
+void setup(){// set the IO pins for the stepper motors as output 
+  pinMode(X_DIR, OUTPUT); pinMode(X_STP, OUTPUT);
+  pinMode(Y_DIR, OUTPUT); pinMode(Y_STP, OUTPUT);
+  pinMode(Z_DIR, OUTPUT); pinMode(Z_STP, OUTPUT);
+  pinMode(EN, OUTPUT);
+  digitalWrite(EN, LOW);
+  
+  pinMode(13, OUTPUT);
+}
+void loop(){
+//  step(false, X_DIR, X_STP, 3200); // x axis motor rotates CCW for 1 circle, as in 200 steps
+ digitalWrite(LED_BUILTIN, HIGH);
+ step(false, Y_DIR, Y_STP, 200); // y axis motor rotates CCW for 1 circle, as in 200 steps
+ digitalWrite(LED_BUILTIN, LOW);
+ delay(1000);
+ digitalWrite(LED_BUILTIN, HIGH);
+ step(true, Y_DIR, Y_STP, 200); // y axis motor rotates CW for 1 circle, as in 200 steps
+ digitalWrite(LED_BUILTIN, LOW);
+ delay(1000);
+//  step(false, Z_DIR, Z_STP, 3200); // z axis motor rotates CCW for 1 circle, as in 200 steps
+//  digitalWrite(LED_BUILTIN, HIGH);
+//  delay(1000);
+//  digitalWrite(LED_BUILTIN, LOW);
+ 
+  // step(true, X_DIR, X_STP, 3200); // X axis motor rotates CW for 1 circle, as in 200 steps
+  
+/*   digitalWrite(X_DIR,LOW);  //LOW sube y HIGH baja
+  tone(X_STP,700);   // a más frecuencia se nos bloquea por falta de par y a menos frecuencia va muy lento
+ */
+
+//  digitalWrite(LED_BUILTIN, HIGH);
+//  step(true, Y_DIR, Y_STP, 300); // y axis motor rotates CW for 1 circle, as in 200 steps
+//  digitalWrite(LED_BUILTIN, LOW);
+//  step(true, Z_DIR, Z_STP, 300); // z axis motor rotates CW for 1 circle, as in 200 steps
+//  digitalWrite(LED_BUILTIN, HIGH);
+//  delay(1000);
+//  digitalWrite(LED_BUILTIN, LOW);
+}

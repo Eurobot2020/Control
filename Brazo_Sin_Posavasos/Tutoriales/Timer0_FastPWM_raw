@@ -1,0 +1,28 @@
+#include <Arduino.h>
+void setup(){
+    DDRD |= (1 << DDD6) | (1 << DDD5);
+    // PD6 is now an output
+    // pinMode(5,OUTPUT);
+
+    OCR0A = 128;
+    // set PWM for 50% duty cycle
+    OCR0B = 64;
+    // set PWM for 25% duty cycle
+
+
+    TCCR0A |= (1 << COM0A1);
+    // set none-inverting mode on OCR0A
+    TCCR0A |= (1 << COM0B1);
+    // set none-inverting mode on OCR0B
+
+    TCCR0A |= (1 << WGM01) | (1 << WGM00);
+    // set fast PWM Mode
+
+    TCCR0B |= (1 << CS01) | (1 << CS00);
+    // set prescaler to 64 and starts PWM
+
+}
+
+void loop(){
+    // we have a working Fast PWM
+}

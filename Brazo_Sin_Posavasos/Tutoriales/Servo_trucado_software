@@ -1,0 +1,61 @@
+#include <Arduino.h>
+#define Y_STP       6       //y axis, stepper motor control
+
+unsigned int timer = 0;
+int pwm = 0;
+int Flag_Vertical = 1;
+float t_high = 0;
+int seg = 0;
+
+
+void setup (){
+  TCCR0A=(1<<WGM01);    //Set the CTC mode   
+  OCR0A=200; //Value for ORC0A for 0.1 ms 
+  TCCR0B=(1<<CS01);    //No prescaler
+  // TCCR0B&=~(1<<CS00);
+  
+  TIMSK0|=(1<<OCIE0A);   //Set the interrupt request
+  sei(); //Enable interrupt
+
+  t_high = 10; //ms/10
+  pinMode(Y_STP, OUTPUT);
+  pinMode(13,OUTPUT);
+}
+
+ISR(TIMER0_COMPA_vect){    //This is the interrupt request
+  timer++;
+  pwm++;
+
+  if(timer>10000){  //Medimos 1 s
+    timer=0;
+    // PORTD |= 1 << Y_STP; //PARADO
+
+    // PORTD ^= 1 << X_DIR; // sets digital pin HIGH/LOW
+    PORTB ^= bit (5); // Toggle the LED
+    // PINB = bit (5); // Poner un 1 en el bit de PINn provoca un toggle, no cambia el nivel permanentemente como hace PORTn
+    // Flag_Vertical = 0;
+    seg++;
+  }
+
+  if(seg == 5){
+    Flag_Vertical ^= 1;
+    seg = 0;
+  }
+
+  if(Flag_Vertical){      //Subiendo                                                
+    if(pwm >= t_high){
+      PORTD &= ~(1 << Y_STP);
+    }
+    if(pwm >= 10*20){
+      pwm = 0;
+      PORTD |= 1 << Y_STP;
+    }
+  }
+  else 
+    PORTD &= ~(1 << Y_STP);
+
+}
+
+void loop (){
+
+}

@@ -1,0 +1,28 @@
+#define F_CPU 16000000UL
+#include <Arduino.h>
+
+
+/*ticks in micros
+  1/fcpu*prescaler*1000000
+*/
+
+void setup() {
+  DDRD |= _BV(DDD5); // pin 5 out
+ 
+  TCCR0A = _BV(WGM00) | _BV(COM0B1) | _BV(COM0B0) ; // mode5 , set on rising clear on falling
+ 
+  TCCR0B = _BV(WGM02) | _BV(CS02) | _BV(CS00); //1024 prescaler
+ 
+  OCR0A = 156; // 156*2=312=20ms period
+
+  OCR0B = 157;
+
+ }
+
+void loop() {
+
+//   for (OCR0B = 140; OCR0B < 148; OCR0B++) _delay_ms(1000); //1ms to 2ms duty
+ 
+//   for (OCR0B = 148; OCR0B > 140; OCR0B--) _delay_ms(1000); //2ms to 1ms duty
+
+}
